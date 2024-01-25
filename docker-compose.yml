@@ -1,69 +1,26 @@
 version: '3'
 services:
-  code-server:
-    image: lscr.io/linuxserver/code-server:latest
-    container_name: code-server
-    environment:
-    # Pro spravny nastaveni uzivatele, pust v bashi `id <jemno uzivatele>` napr: `id david`
-    # output je neco takovyho:
-    # `uid=501(david) gid=20(staff) [...]`
-      - PUID=501
-      - PGID=20
-      - TZ=Etc/UTC
-      # tyhle envvars nevim, jsou optional ;)
-      # - PASSWORD=password #optional
-      # - HASHED_PASSWORD= #optional
-      # - SUDO_PASSWORD=password #optional
-      # - SUDO_PASSWORD_HASH= #optional
-      # - PROXY_DOMAIN=code-server.my.domain #optional
-      
-      # tohle je relativni cesta k volumes, ktera se otevre na localhost:8443
-      # bohuzej se mi nepodarilo mit vscode aby otevrel workspace mimo code-server slozku,
-      # tak jsem to vyresil obracene, ze esphome ma tenhle workspace jako svoji 
-      # cilovou slozku
-      - DEFAULT_WORKSPACE=/workspace #optional
-    volumes:
-      - ./code-server:/config
-    ports:
-      - 8443:8443
-    restart: unless-stopped
-  
-  # Asi spatna volba. Smazat a pouzit neco z mqtt
-  # https://github.com/docker/awesome-compose/blob/master/prometheus-grafana/prometheus/prometheus.yml
-  prometheus:
-    image: prom/prometheus
-    container_name: prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-    ports:
-      - 9090:9090
-    restart: unless-stopped
-    volumes:
-      - ./prometheus:/etc/prometheus
-      - prom_data:/prometheus
-  grafana:
-    image: grafana/grafana
-    container_name: grafana
-    ports:
-      - 3000:3000
+  node-red:
+    image: nodered/node-red:latest
     restart: unless-stopped
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=grafana
+      - TZ=Europe/London
+    networks:
+      - node-red-net
+    ports:
+      - "1880:1880"
     volumes:
-      - ./grafana:/etc/grafana/provisioning/datasources
+      - node-red-data:/data
 
-  # mosquitto:
-  #   image: eclipse-mosquitto
-  #   container_name: mosquitto_broker
-  #   network_mode: host
-  #   volumes:
-  #     - ./conf:/mosquitto/conf
-  #     - ./data:/mosquitto/data
-  #     - ./log:/mosquitto/log
-  #   ports:
-  #     - 1883:1883 
-  #     - 9001:9001
+  MQTTbroker:
+    image: eclipse-mosquitto:1.6.13
+    restart: unless-stopped
+    ports:
+      - 1883:1883
+    networks:
+      - node-red-net
+
+
   
   esphome:
     image: ghcr.io/esphome/esphome
@@ -82,4 +39,7 @@ services:
       - 6052:6052
 
 volumes:
-  prom_data:
+  node-red-data:
+
+networks:
+  node-red-net:
