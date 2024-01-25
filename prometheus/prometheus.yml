@@ -1,0 +1,35 @@
+# global:
+#   scrape_interval: 15s
+#   scrape_timeout: 10s
+#   evaluation_interval: 15s
+# alerting:
+#   alertmanagers:
+#   - static_configs:
+#     - targets: []
+#     scheme: http
+#     timeout: 10s
+#     api_version: v1
+# scrape_configs:
+# - job_name: esphome_wifi_strenght
+#   honor_timestamps: true
+#   scrape_interval: 15s
+#   scrape_timeout: 10s
+#   metrics_path: /metrics
+#   scheme: http
+#   static_configs:
+#   - targets:
+#     # - localhost:9090
+#     - something.local
+scrape_configs:
+  - job_name: 'esphome'
+  # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 5s
+    static_configs:
+      # - targets: [<ip or node_name.local>]
+      - targets: ['192.168.0.16:80']
+        labels:
+          service: 'esp32_wifi_meter_mDNS'
+      - targets: ['something.local:80']
+        labels:
+          service: 'esp32_wifi_meter'
+#       # http://something.local/metrics
