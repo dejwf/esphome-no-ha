@@ -1,4 +1,4 @@
-name: WLED compile
+name: WLED Staircase MQTT
 
 on:
     workflow_dispatch:
@@ -24,14 +24,14 @@ jobs:
       run: |
         rm -rf /tmp/WLEDtemp/* || true
         mkdir -p /tmp/WLEDtemp
-        wget https://github.com/moonmodules/WLED/archive/refs/heads/mdev.zip -O /tmp/WLEDtemp/mm.zip
+        wget https://github.com/Aircoookie/WLED/archive/refs/heads/main.zip -O /tmp/WLEDtemp/mm.zip
         unzip /tmp/WLEDtemp/mm.zip -d /tmp/WLEDtemp
         find /tmp/WLEDtemp -maxdepth 1 -mindepth 1 -name "*" -type d >> /tmp/WLEDtemp/wledfoldername
         cd `cat /tmp/WLEDtemp/wledfoldername`
         npm install
         echo '[env:custom_build]' >>platformio.ini
         echo 'extends = env:esp32dev' >>platformio.ini
-        echo 'build_flags = ${env:esp32dev.build_flags} -D USERMOD_AUTO_SAVE -D USERMOD_ANIMATED_STAIRCASE -D USERMOD_PIRSWITCH' >>platformio.ini
+        echo 'build_flags = ${env:esp32dev.build_flags} -D WLED_DEBUG -D WLED_ENABLE_MQTT -D WLED_DISABLE_ALEXA -D WLED_DISABLE_HUESYNC -D WLED_DISABLE_2D -D DEFAULT_LED_COUNT=250 -D CLIENT_SSID='\''"UPC3212912_IoT"'\'' -D CLIENT_PASS='\''"VTQEXEHE"'\'' -D USERMOD_ANIMATED_STAIRCASE' >>platformio.ini
         
         pio run -e custom_build || pio run -e custom_build
     - name: Copy Files
@@ -49,4 +49,4 @@ jobs:
         git add $GITHUB_WORKSPACE/custom_build.bin
         git add $GITHUB_WORKSPACE/last_update_date.txt
         git commit -m "Commit Custom Build"
-        git push origin main
+        git push origin wled-builds
