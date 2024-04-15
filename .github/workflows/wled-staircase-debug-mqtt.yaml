@@ -1,4 +1,4 @@
-name: WLED compile
+name: WLED Staircase MQTT
 
 on:
     workflow_dispatch:
